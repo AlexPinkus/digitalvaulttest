@@ -8,4 +8,6 @@
   },
   "author": "Jorge Adrian Puc Carrillo",
   "license": "ISC"
+  // Don't forget to add your dependencies! (npm i "dependency")
+  // Also I'd give you extra points if you set up prettier to format your code.
 }
