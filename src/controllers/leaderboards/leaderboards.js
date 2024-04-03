@@ -5,26 +5,30 @@ const mongoose = require("mongoose");
 const createLeaderboards = async (req, res) => {
     const body  =  req.body;
     try {
-        if (!body.name ){
+        // I'd suggest moving your validations into a separate service and using common tools for validating jsons like Joi or Json Validator.
+        // You can validate as a middleware.
+        if (!body.name ){ 
             let message = "Body error: Leaderboards's name is Mandatory";
-            res.status(500).json({ 
+            res.status(500).json({ // 500 status are for server errors this should be a 400 Bad Request
                 ok: false,
                 message: message 
             });
             return
         }
+        const createdLeaderBoard = await leaderboards.create({name: body.name}); // only need to create the leaderBoardHere
+        // const schema = new mongoose.Schema(createdleaderboards) // I'd rename createdleaderboards to leaderBoardUsers
+
         
-        const schema = new mongoose.Schema(leaderboards)
-        await createdleaderboards.create({name: body.name});
-        let selectedBoaard;
-        try {
-            selectedBoaard = mongoose.model(body.name);
-        } catch (error) {
-            selectedBoaard = mongoose.model(body.name, schema);
-        }
+        // let selectedBoaard; // You're not using this variable
+        // try {
+        //     selectedBoaard = mongoose.model(body.name); // 
+        // } catch (error) {
+        //     selectedBoaard = mongoose.model(body.name, schema);
+        // }
         res.status(200).json({
             ok: true,
-            message: "Leaderboard Created"
+            message: "Leaderboard Created",
+            data: createdLeaderBoard
         });
     } catch (error) {
         res.status(500).json({ 
@@ -47,10 +51,10 @@ const addUserToLeaderboard = async (req, res) => {
             });
             return
         }
-        const leaderboardName = await createdleaderboards.findById(body.idLeaderboard);
+        const leaderboardName = await leaderboards.findById(body.idLeaderboard);
         let selectedBoaard;
         try {
-            selectedBoaard = mongoose.model(leaderboardName.name);
+            selectedBoaard = mongoose.model(leaderboardName.name); // you shouldn't need to use a try catch whe geeting a mongoose model
         } catch (error) {
             res.status(500).json({ 
                 ok: false,
@@ -76,8 +80,8 @@ const updateUserScore = async (req, res) => {
         if (!body.idLeaderboard || !body.idUser || !body.score ){
             let message = "Body error: ";
             message = !body.idLeaderboard ? message + "Leaderboards's id is Mandatory " : message;
-            message = !body.idUser ? message + "Users' id is Mandatory " : message;
-            message = !body.idUser ? message + "Users' points erned/lose are Mandatory " : message;
+            message = !body.idUser ? message + "User's id is Mandatory " : message;
+            message = !body.idUser ? message + "User's points are Mandatory " : message;
             res.status(500).json({ 
                 ok: false,
                 message: message 
@@ -186,11 +190,8 @@ const getUserRank = async (req, res) => {
             });
         }
         const userScore = await selectedBoaard.aggregate([
-            // Filtrar los documentos que coincidan con el criterio
             { $match: { owner: body.idUser } },
-            // Ordenando los archivos para obtener un raking de menor a mayor.
             { $sort: { score: 1 } },
-            // Agregar un campo 'index' que contenga el índice del documento
             { $group: { _id: null, index: { $push: "$$ROOT" } } },
         ]).populate({path: 'owner', select: 'name'})
         res.status(200).json({
@@ -231,13 +232,9 @@ const getUserNearestRank = async (req, res) => {
             });
         }
         const userScore = await selectedBoaard.aggregate([
-            // Filtrar los documentos que coincidan con el criterio
             { $match: { owner: body.idUser } },
-            // Ordenando los archivos para obtener un raking de menor a mayor.
             { $sort: { score: 1 } },
-            // Agregar un campo 'index' que contenga el índice del documento
             { $group: { _id: null, index: { $push: "$$ROOT" } } },
-            // Proyectar solo el campo 'index'
             { $project: { _id: 0, index: 1 } }
         ])
         const skip = userScore[0].index[0] > body.size/2 ? userScore[0].index[0] - body.size/2 : 0 ;
@@ -274,7 +271,7 @@ const deleteLeaderboard = async (req, res) => {
         try {
             selectedBoaard = mongoose.model(deletedItem.name);
             await selectedBoaard.collection.drop();
-        } catch (error) {/** coletion already no exist*/}
+        } catch (error) {}
         res.status(200).json({
             ok: true,
             message: "Leaderboard deleted"
