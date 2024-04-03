@@ -7,6 +7,7 @@ const leaderboards =
             ref: 'users',
             unique: true 
         },
+     // I'd add the userName here as well to avoid having to join with the users table.
         score: {
             type: Number,
             default:0,
