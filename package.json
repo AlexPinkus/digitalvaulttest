@@ -1,0 +1,11 @@
+{
+  "name": "digitalvault",
+  "version": "1.0.0",
+  "description": "Backend leader board",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm dev"
+  },
+  "author": "Jorge Adrian Puc Carrillo",
+  "license": "ISC"
+}
