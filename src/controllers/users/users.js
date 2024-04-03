@@ -19,7 +19,7 @@ const createUser = async (req, res) => {
             ok: true,
             message: "Leaderboard Created"
         });
-    } catch (error) {
+    } catch (error) { // You can move your error handler to a middleware.
         res.status(500).json({ 
             ok: false,
             message: error.message 
