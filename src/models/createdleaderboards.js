@@ -5,7 +5,7 @@ const leaderboardsSchema =  new mongoose.Schema({
         type: String,
         required: true
     },
-    cative:{
+    active:{
         type: Boolean,
         default: true
     },
